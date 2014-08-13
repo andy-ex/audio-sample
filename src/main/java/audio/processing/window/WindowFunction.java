@@ -5,7 +5,7 @@ package audio.processing.window;
  */
 public interface WindowFunction {
 
-    double[] apply(int[] in);
+    double[] apply(double[] in);
     double get(int index, int length);
 
 }
