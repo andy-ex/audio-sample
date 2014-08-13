@@ -4,7 +4,7 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 import util.FxmlUtil;
 
-import javax.sound.sampled.*;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.IOException;
 
 /**

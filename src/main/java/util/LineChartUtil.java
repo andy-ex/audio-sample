@@ -18,4 +18,16 @@ public class LineChartUtil {
         }
         return series;
     }
+
+    public static  XYChart.Series<Number, Number> createNumberSeries(double[] data) {
+        return createNumberSeries(data, 1);
+    }
+
+    public static  XYChart.Series<Number, Number> createNumberSeries(double[] data, int rate) {
+        XYChart.Series<Number, Number> series = new XYChart.Series<>();
+        for (int i = 0; i < data.length; i = i + rate) {
+            series.getData().add(new XYChart.Data<>(i, data[i]));
+        }
+        return series;
+    }
 }

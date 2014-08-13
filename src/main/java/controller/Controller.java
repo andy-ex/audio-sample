@@ -2,6 +2,11 @@ package controller;
 
 import audio.processing.SimpleWaveformExtractor;
 import audio.processing.WaveformExtractor;
+import audio.processing.model.Complex;
+import audio.processing.model.ComplexArray;
+import audio.processing.transform.DFT;
+import audio.processing.transform.FFT;
+import audio.processing.transform.FFTTest;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
@@ -67,13 +72,82 @@ public class Controller implements Initializable {
         if ( (file = fileChooser.showOpenDialog(root.getScene().getWindow())) != null) {
             AudioInputStream in = AudioSystem.getAudioInputStream(file);
             int[] extractedData = new SimpleWaveformExtractor().extract(in);
-            extractedData = Arrays.copyOfRange(extractedData, 0, 100);
+           // double[] data = toDoubleArray(Arrays.copyOfRange(extractedData, 0, 3700));
             XYChart.Series<Number, Number> series = LineChartUtil.createNumberSeries(extractedData);
             series.setName(file.getName());
             lineChart.getData().add(series);
         }
     }
 
+    private void printMax(double[] data) {
+        int maxIndex = 0;
+        for (int i = 0; i < data.length; i++) {
+            if (data[i] > data[maxIndex]) {
+                maxIndex = i;
+            }
+        }
+        System.out.println("Max: index = " + maxIndex);
+    }
+
+    public void plotCosine() {
+        double[] cos = createCos(16, 4);
+        System.out.println("Cosine created. N = " + cos.length);
+        FFT fft = new FFT();
+        double[] empty = new double[cos.length];
+        ComplexArray transformResult = fft.fft(cos);
+        //FFTTest.transform(cos, empty);
+        //Complex[] transformResult = new DFT().transform(cos);
+        System.out.println("DFT applied");
+        XYChart.Series<Number, Number> numberSeries = LineChartUtil.createNumberSeries(transformResult.getRealPart());
+        //XYChart.Series<Number, Number> numberSeries = LineChartUtil.createNumberSeries(cos);
+        lineChart.getData().add(numberSeries);
+        System.out.println("Plotting...");
+    }
+
+    private double[] createCos(int sampleRate, int samples) {
+        double[] result = new double[samples * sampleRate];
+        for (int i = 0; i < samples; i++) {
+            for (int j = 0; j < sampleRate; ++j) {
+                result[i * sampleRate + j] = Math.cos(2.0 * Math.PI * j / sampleRate);
+            }
+        }
+        return result;
+    }
+
+    private double[] toDoubleArray(int[] input) {
+        double[] result = new double[input.length];
+        for (int i = 0; i < input.length; i++) {
+            result[i] = input[i];
+        }
+        return result;
+    }
+
+    private double[] toReal(Complex[] complex) {
+        double[] result = new double[complex.length];
+        for (int i = 0; i < result.length; i++) {
+            result[i] = complex[i].getReal();
+        }
+        return result;
+    }
+
+    private double[] toAbsoluteArray(Complex[] complex) {
+        int size = complex.length;
+        double[] result = new double[size];
+        int max = 0;
+        int secondMax = 0;
+        for (int i = 2; i < size; i++) {
+            result[i] = complex[i].getAbsoluteValue();
+            if (result[i] > result[max]) {
+                max = i;
+            } else if (result[i] > result[secondMax]) {
+                secondMax = i;
+            }
+        }
+        System.out.println("Max value:" + result[max] + ", index = " + max);
+        System.out.println("Second max value:" + result[secondMax] + ", index = " + secondMax);
+
+        return result;
+    }
     public void clear() {
         lineChart.getData().clear();
     }

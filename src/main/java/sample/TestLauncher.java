@@ -1,107 +1,106 @@
 package sample;
 
-import javafx.application.Application;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.event.EventHandler;
-import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.XYChart;
-import javafx.stage.Stage;
-import javafx.scene.Scene;
-import javafx.scene.chart.LineChart;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.BorderPane;
+import audio.processing.model.Complex;
+import audio.processing.model.ComplexArray;
+import audio.processing.transform.DFT;
+import audio.processing.transform.FFT;
+import audio.processing.transform.FFTTest;
+import audio.processing.transform.FourierTransform;
+import audio.processing.window.HammingWindow;
+import org.apache.commons.lang3.ArrayUtils;
+
+import java.util.Arrays;
 
 
-
-public class TestLauncher extends Application {
-
-    BorderPane pane;
-    XYChart.Series series1 = new XYChart.Series();
-    SimpleDoubleProperty rectinitX = new SimpleDoubleProperty();
-    SimpleDoubleProperty rectX = new SimpleDoubleProperty();
-    SimpleDoubleProperty rectY = new SimpleDoubleProperty();
-
-    @Override
-    public void start(Stage stage) {
-
-        final NumberAxis xAxis = new NumberAxis(1, 12, 1);
-        final NumberAxis yAxis = new NumberAxis(0.53000, 0.53910, 0.0005);
-
-        xAxis.setAnimated(false);
-        yAxis.setAnimated(false);
-
-        yAxis.setTickLabelFormatter(new NumberAxis.DefaultFormatter(yAxis) {
-            @Override
-            public String toString(Number object) {
-                return String.format("%7.5f", object);
-            }
-        });
-
-        final LineChart<Number, Number> lineChart = new LineChart<Number, Number>(xAxis, yAxis);
-
-        lineChart.setCreateSymbols(false);
-        lineChart.setAlternativeRowFillVisible(false);
-        lineChart.setAnimated(false);
-        lineChart.setLegendVisible(false);
-
-        series1.getData().add(new XYChart.Data(1, 0.53185));
-        series1.getData().add(new XYChart.Data(2, 0.532235));
-        series1.getData().add(new XYChart.Data(3, 0.53234));
-        series1.getData().add(new XYChart.Data(4, 0.538765));
-        series1.getData().add(new XYChart.Data(5, 0.53442));
-        series1.getData().add(new XYChart.Data(6, 0.534658));
-        series1.getData().add(new XYChart.Data(7, 0.53023));
-        series1.getData().add(new XYChart.Data(8, 0.53001));
-        series1.getData().add(new XYChart.Data(9, 0.53589));
-        series1.getData().add(new XYChart.Data(10, 0.53476));
-
-        pane = new BorderPane();
-        pane.setCenter(lineChart);
-        Scene scene = new Scene(pane, 800, 600);
-        lineChart.getData().addAll(series1);
-
-        stage.setScene(scene);
-
-        scene.setOnMouseClicked(mouseHandler);
-        scene.setOnMouseDragged(mouseHandler);
-        scene.setOnMouseEntered(mouseHandler);
-        scene.setOnMouseExited(mouseHandler);
-        scene.setOnMouseMoved(mouseHandler);
-        scene.setOnMousePressed(mouseHandler);
-        scene.setOnMouseReleased(mouseHandler);
-        stage.show();
-    }
-    EventHandler<MouseEvent> mouseHandler = new EventHandler<MouseEvent>() {
-        @Override
-        public void handle(MouseEvent mouseEvent) {
-
-            if (mouseEvent.getEventType() == MouseEvent.MOUSE_PRESSED) {
-                rectinitX.set(mouseEvent.getX());
-            } else if (mouseEvent.getEventType() == MouseEvent.MOUSE_DRAGGED || mouseEvent.getEventType() == MouseEvent.MOUSE_MOVED) {
-                LineChart<Number, Number> lineChart = (LineChart<Number, Number>) pane.getCenter();
-                NumberAxis xAxis = (NumberAxis) lineChart.getXAxis();
-
-                double Tgap = xAxis.getWidth() / (xAxis.getUpperBound() - xAxis.getLowerBound());
-                double newXlower = xAxis.getLowerBound(), newXupper = xAxis.getUpperBound();
-                double Delta = 0.3;
-
-                if (mouseEvent.getEventType() == MouseEvent.MOUSE_DRAGGED) {
-                    if (rectinitX.get() < mouseEvent.getX()) {
-                        newXlower = xAxis.getLowerBound() - Delta;
-                        newXupper = xAxis.getUpperBound() - Delta;
-                    } else if (rectinitX.get() > mouseEvent.getX()) {
-                        newXlower = xAxis.getLowerBound() + Delta;
-                        newXupper = xAxis.getUpperBound() + Delta;
-                    }
-                    xAxis.setLowerBound(newXlower);
-                    xAxis.setUpperBound(newXupper);
-                }
-                rectinitX.set(mouseEvent.getX());
-            }
-        }
-    };
+public class TestLauncher {
 
     public static void main(String[] args) {
-        launch(args);
+
+        temp();
+    }
+
+    private static void temp() {
+
+        double[] array = new double[] {0, 1, 2, 3, 4, 5, 6, 7};
+        double[] arrayCopy = Arrays.copyOf(array, array.length);
+
+        FFT fft = new FFT();
+
+        FFTTest.transformRadix2(array, new double[array.length]);
+        ComplexArray result = fft.fft(arrayCopy);
+
+        System.out.println(Arrays.toString(array));
+        System.out.println(Arrays.toString(result.getRealPart()));
+
+
+
+
+
+//        int shift = 1 + Integer.numberOfLeadingZeros(array.length);
+//
+//        for (int i = 0; i < array.length; ++i) {
+//            int reversed = Integer.reverse(i) >>> shift;
+//            if (reversed > i) {
+//                int temp = array[i];
+//                array[i] = array[reversed];
+//                array[reversed] = temp;
+//            }
+//        }
+
+//        for (int i = 2; i <= array.length; i *= 2) {
+//            int half = i / 2;
+//            for (int j = 0; j < array.length; j += i) {
+//                for (int k = j; k < j + half; ++k) {
+//                    array[k] += array[k + half];
+//                    array[k + half] = array[k];
+//                }
+//                System.out.println(Arrays.toString(array));
+//            }
+//        }
+        //System.out.println(Arrays.toString(array));
+
+    }
+
+    private static void testFFT() {
+        DFT dft = new DFT();
+        FFT fft = new FFT();
+
+        double[] real = {0.0, 1.0, 2.0, 3.0, 4, 5, 6, 7};
+        double[] imag = {0, 0, 0, 0, 0, 0, 0, 0};
+
+       // Complex[] fftResult = fft.fft(real);
+        ComplexArray dftResult = dft.transform(real);
+        FFTTest.transform(real, imag);
+
+        System.out.println(Arrays.toString(real));
+        System.out.println(Arrays.toString(imag));
+        System.out.println(Arrays.toString(dftResult.getRealPart()));
+        //System.out.println(Arrays.toString(fftResult));
+    }
+
+    private static Complex[] toComplexArray(double[] in) {
+        Complex[] result = new Complex[in.length];
+        for (int i = 0; i < result.length; i++) {
+            result[i] = new Complex(in[i], 0);
+        }
+        return result;
+    }
+
+    private static void windowing() {
+        int nSamples = 100;
+        int m = nSamples / 2;
+        double r;
+        double pi = Math.PI;
+        double[] w = new double[nSamples];
+
+        r = pi / m;
+        for (int n = -m; n < m; n++)
+            w[m + n] = 0.54f + 0.46f * Math.cos(n * r);
+
+        System.out.println(Arrays.toString(w));
+
+        int[] e = new int[nSamples];
+        Arrays.fill(e, 1);
+        //System.out.println(Arrays.toString( new HammingWindow().apply(e)));
     }
 }

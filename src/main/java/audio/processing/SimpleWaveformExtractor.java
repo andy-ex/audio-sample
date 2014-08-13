@@ -1,5 +1,7 @@
 package audio.processing;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import java.io.IOException;
@@ -30,10 +32,10 @@ public class SimpleWaveformExtractor implements WaveformExtractor {
                     result[i] = MSB << 8 | (255 & LSB);
                 }
             } else {
-                for (int i = 0; i < samplesLength; ++i) {
+                for (int i = 0; i < samplesLength; i += 2) {
                     byte LSB = audioBytes[i * 2];
                     byte MSB = audioBytes[i * 2 + 1];
-                    result[i] = MSB << 8 | (255 & LSB);
+                    result[i / 2] = MSB << 8 | (255 & LSB);
                 }
             }
         } else {
@@ -53,24 +55,18 @@ public class SimpleWaveformExtractor implements WaveformExtractor {
     }
 
     private byte[] readBytes(AudioInputStream in) {
-        List<Byte> result = new ArrayList<Byte>();
+        byte[] result = new byte[0];
         byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
 
         try {
             int bytesRead = 0;
             do {
                 bytesRead = in.read(buffer);
-                for (int i = 0; i < bytesRead; ++i) {
-                    result.add(buffer[i]);
-                }
+                result = ArrayUtils.addAll(result, buffer);
             } while (bytesRead != -1);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        byte[] temp = new byte[result.size()];
-        for (int i = 0; i < result.size(); ++i) {
-            temp[i] = result.get(i);
-        }
-        return temp;
+        return result;
     }
 }
