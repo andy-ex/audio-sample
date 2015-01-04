@@ -1,92 +1,120 @@
 package controller;
 
-import audio.processing.SimpleWaveformExtractor;
-import audio.processing.WaveformExtractor;
-import audio.processing.model.Complex;
+import audio.processing.mfcc.MfccExtractor;
+import audio.processing.waveform.*;
+import audio.processing.mfcc.MelFilterBank;
 import audio.processing.model.ComplexArray;
-import audio.processing.transform.DFT;
-import audio.processing.transform.FFT;
-import audio.processing.transform.FFTTest;
+import audio.processing.transformation.FFT;
+import audio.processing.window.HammingWindow;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
-import javafx.scene.chart.Axis;
 import javafx.scene.chart.LineChart;
-import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
-import javafx.stage.Stage;
-import util.FileSystemUtil;
+import util.ArraysHelper;
+import util.FileSystem;
 import util.LineChartUtil;
 
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 
 /**
- * Created by Dmitry on 6/27/2014.
+ * Created by Dmitry on 6/27/2014
  */
 public class Controller implements Initializable {
 
+    public static final int RATE = 1;
     @FXML
     private LineChart<Number, Number> lineChart;
     @FXML
     private VBox root;
 
-    public void plotDefault() throws IOException, UnsupportedAudioFileException {
-
-        AudioInputStream rock = AudioSystem.getAudioInputStream(FileSystemUtil.getResourceURL("/rock.au"));
-        AudioInputStream classical = AudioSystem.getAudioInputStream(FileSystemUtil.getResourceURL("/classical.au"));
-
-        WaveformExtractor extractor = new SimpleWaveformExtractor();
-
-        XYChart.Series<Number, Number> rockSeries = new XYChart.Series<>();
-        XYChart.Series<Number, Number> classicalSeries = new XYChart.Series<>();
-
-        int category = 0;
-        int[] extract = extractor.extract(rock);
-        for (int i = 0; i < extract.length; i = i + 100) {
-            rockSeries.getData().add(new XYChart.Data<>(category++, extract[i]));
-        }
-        category = 0;
-        int[] extract1 = extractor.extract(classical);
-        for (int i = 0; i < extract1.length; i = i + 100) {
-            classicalSeries.getData().add(new XYChart.Data<>(category++, extract1[i]));
-        }
-
-        lineChart.getData().add(rockSeries);
-        lineChart.getData().add(classicalSeries);
+    public static void main(String[] args) throws UnsupportedAudioFileException, IOException, URISyntaxException {
+        double d = (double)6/10;
+        System.out.println(d);
+        new Controller().plotDefault();
     }
 
-    public void plotAudio() throws IOException, UnsupportedAudioFileException {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setInitialDirectory(new File(FileSystemUtil.getResourceFolderPath()));
+    public void plotDefault() throws IOException, UnsupportedAudioFileException, URISyntaxException {
+        File file = new File(FileSystem.getResourceURL("/sine-440.wav").toURI());
 
-        File file;
-        if ( (file = fileChooser.showOpenDialog(root.getScene().getWindow())) != null) {
-            AudioInputStream in = AudioSystem.getAudioInputStream(file);
-            int[] extractedData = new SimpleWaveformExtractor().extract(in);
-           // double[] data = toDoubleArray(Arrays.copyOfRange(extractedData, 0, 3700));
-            XYChart.Series<Number, Number> series = LineChartUtil.createNumberSeries(extractedData);
-            series.setName(file.getName());
-            lineChart.getData().add(series);
-        }
-    }
-
-    private void printMax(double[] data) {
-        int maxIndex = 0;
-        for (int i = 0; i < data.length; i++) {
-            if (data[i] > data[maxIndex]) {
-                maxIndex = i;
+        if (file != null) {
+            double[] waveform = extractWaveform(file);
+            double[][] coefficients = new MfccExtractor().extractCoefficients(waveform, 44100);
+            for (double[] coefficient : coefficients) {
+                print(coefficient);
             }
         }
-        System.out.println("Max: index = " + maxIndex);
+    }
+
+    public void plotAudio() throws IOException, UnsupportedAudioFileException, WavFileException {
+        File file = chooseFile();
+
+        if (file != null) {
+            double[] extractedData = extractWaveform(file);
+            plot(extractedData);
+        }
+    }
+
+    public void plotFFT() throws IOException, UnsupportedAudioFileException {
+        File file = chooseFile();
+
+        if (file != null) {
+            double[] extractedData = extractWaveform(file);
+            double[] windowed = new HammingWindow().apply(extractedData);
+            ComplexArray fft = new FFT().fft(windowed);
+            plot(toDbScale(fft));
+        }
+    }
+
+    public void plotMelFilterBank() {
+        MelFilterBank bank = new MelFilterBank();
+        int[] melSpacedFrequencies = bank.getMelSpacedFrequencies(300, 8000, 512, 10);
+        System.out.println(Arrays.toString(melSpacedFrequencies));
+
+        for (int i = 1; i < melSpacedFrequencies.length; i++) {
+            plot(bank.createFilterBank(melSpacedFrequencies, i));
+        }
+    }
+
+    private double[] toDbScale(ComplexArray input) {
+        double[] result = new double[input.getRealPart().length];
+        for (int i = 0; i < result.length; i++) {
+            double abs = Math.sqrt(Math.pow(input.getRealPart()[i], 2) + Math.pow(input.getImaginaryPart()[i], 2));
+            result[i] = 20 * Math.log10(abs);
+        }
+        return result;
+    }
+
+    private double[] extractWaveform(File file) throws IOException, UnsupportedAudioFileException {
+        return new WavFileExtractor().extract(file);
+    }
+
+
+    private File chooseFile() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setInitialDirectory(new File(FileSystem.getResourceFolderPath()));
+
+        return fileChooser.showOpenDialog(null);
+    }
+
+    private void print(double[] data) {
+        System.out.println(Arrays.toString(data));
+    }
+
+    private void plot(int[] array) {
+        plot(ArraysHelper.toDoubleArray(array));
+    }
+
+    private void plot(double[] array) {
+        XYChart.Series<Number, Number> numberSeries = LineChartUtil.createNumberSeries(array, RATE);
+        //lineChart.getData().clear();
+        lineChart.getData().addAll(numberSeries);
     }
 
     public void plotCosine() {
@@ -95,9 +123,6 @@ public class Controller implements Initializable {
         FFT fft = new FFT();
         double[] empty = new double[cos.length];
         ComplexArray transformResult = fft.fft(cos);
-        //FFTTest.transform(cos, empty);
-        //Complex[] transformResult = new DFT().transform(cos);
-        System.out.println("DFT applied");
         XYChart.Series<Number, Number> numberSeries = LineChartUtil.createNumberSeries(transformResult.getRealPart());
         //XYChart.Series<Number, Number> numberSeries = LineChartUtil.createNumberSeries(cos);
         lineChart.getData().add(numberSeries);
@@ -114,40 +139,6 @@ public class Controller implements Initializable {
         return result;
     }
 
-    private double[] toDoubleArray(int[] input) {
-        double[] result = new double[input.length];
-        for (int i = 0; i < input.length; i++) {
-            result[i] = input[i];
-        }
-        return result;
-    }
-
-    private double[] toReal(Complex[] complex) {
-        double[] result = new double[complex.length];
-        for (int i = 0; i < result.length; i++) {
-            result[i] = complex[i].getReal();
-        }
-        return result;
-    }
-
-    private double[] toAbsoluteArray(Complex[] complex) {
-        int size = complex.length;
-        double[] result = new double[size];
-        int max = 0;
-        int secondMax = 0;
-        for (int i = 2; i < size; i++) {
-            result[i] = complex[i].getAbsoluteValue();
-            if (result[i] > result[max]) {
-                max = i;
-            } else if (result[i] > result[secondMax]) {
-                secondMax = i;
-            }
-        }
-        System.out.println("Max value:" + result[max] + ", index = " + max);
-        System.out.println("Second max value:" + result[secondMax] + ", index = " + secondMax);
-
-        return result;
-    }
     public void clear() {
         lineChart.getData().clear();
     }

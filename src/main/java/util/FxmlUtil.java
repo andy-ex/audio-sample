@@ -4,7 +4,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import javafx.stage.Window;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +22,7 @@ public class FxmlUtil
         FXMLLoader loader = new FXMLLoader();
 
         //loader.setResources(ResourceBundle.getBundle("conf.conf"));
-        Parent rootNode = (Parent) loader.load(FxmlUtil.class.getResourceAsStream(fxmlFile));
+        Parent rootNode = loader.load(FxmlUtil.class.getResourceAsStream(fxmlFile));
 
         log.debug("Showing JFX scene");
         return new Scene(rootNode);

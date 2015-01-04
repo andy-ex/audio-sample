@@ -20,9 +20,9 @@ public class MelFilterBank {
         if (k < f[m - 1]) {
             return 0;
         } else if (k < f[m]) {
-            return new Double(k - f[m - 1]) / (f[m] - f[m - 1]);
+            return (double) (k - f[m - 1]) / (f[m] - f[m - 1]);
         } else if (k <= f[m + 1]) {
-            return new Double(f[m + 1] - k) / (f[m + 1] - f[m]);
+            return (double) (f[m + 1] - k) / (f[m + 1] - f[m]);
         } else {
             return 0;
         }

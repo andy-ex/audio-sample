@@ -4,9 +4,7 @@ import audio.processing.framing.SignalFramer;
 import audio.processing.model.ComplexArray;
 import audio.processing.transformation.DCT;
 import audio.processing.transformation.DFT;
-import audio.processing.transformation.FFT;
 import audio.processing.transformation.FourierTransform;
-import util.ArraysHelper;
 
 import java.util.Arrays;
 
@@ -17,13 +15,12 @@ import static util.ArraysHelper.*;
  */
 public class MfccExtractor {
 
-    private SignalFramer signalFramer;
     private FourierTransform transformation = new DFT();
     private static final int FFT_SIZE = 512;
     private static final int COEFFICIENTS_COUNT = 26;
 
     public double[][] extractCoefficients(double[] sourceSignal, int sampleRate) {
-        signalFramer = new SignalFramer(sampleRate);
+        SignalFramer signalFramer = new SignalFramer(sampleRate);
         int framesCount = sourceSignal.length / signalFramer.getFrameStep();
 
         double[][] result = new double[framesCount][COEFFICIENTS_COUNT];
