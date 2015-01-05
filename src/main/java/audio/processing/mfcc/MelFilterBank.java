@@ -5,14 +5,37 @@ package audio.processing.mfcc;
  */
 public class MelFilterBank {
 
-    public double[] createFilterBank(int[] melSpacedFrequencies, int sampleNumber) {
+    private int[] melSpacedFrequencies;
+    private double[][] melFilterBanks;
 
-        double[] h = new double[melSpacedFrequencies[melSpacedFrequencies.length - 1] + 1];
-        for (int k = 0; k < h.length; ++k) {
-            h[k] = filterBankCoefficient(k, sampleNumber, melSpacedFrequencies);
+    public MelFilterBank(double lowerFreq, double upperFreq, double fftSize, int filtersCount) {
+        melSpacedFrequencies = new int[filtersCount + 2];
+
+        for (int i = 0; i < melSpacedFrequencies.length; i++) {
+            melSpacedFrequencies[i] = (int) Math.floor(((fftSize + 1) / (2.0 * upperFreq)) * filterCoefficient(lowerFreq, upperFreq, i, filtersCount));
         }
 
-        return h;
+        createFilterBanks();
+    }
+
+    public double[] getFilterBank(int sampleNumber) {
+        return melFilterBanks[sampleNumber];
+    }
+
+    public int getFiltersCount() {
+        return melFilterBanks.length;
+    }
+
+    private void createFilterBanks() {
+        melFilterBanks = new double[melSpacedFrequencies.length - 2][];
+
+        for (int i = 1; i < melSpacedFrequencies.length - 1; ++i) {
+            double[] h = new double[melSpacedFrequencies[melSpacedFrequencies.length - 1] + 1];
+            for (int k = 0; k < h.length; ++k) {
+                h[k] = filterBankCoefficient(k, i, melSpacedFrequencies);
+            }
+            melFilterBanks[i-1] = h;
+        }
     }
 
     private double filterBankCoefficient(int k, int m, int[] f) {
@@ -26,17 +49,6 @@ public class MelFilterBank {
         } else {
             return 0;
         }
-    }
-
-    public int[] getMelSpacedFrequencies(double lowerFreq, double upperFreq, double fftSize, int filtersCount) {
-
-        int[] f = new int[filtersCount + 2];
-
-        for (int i = 0; i < f.length; i++) {
-            f[i] = (int) Math.floor(((fftSize + 1) / (2.0 * upperFreq)) * filterCoefficient(lowerFreq, upperFreq, i, filtersCount));
-        }
-
-        return f;
     }
 
     private double filterCoefficient(double lowerFreq, double upperFreq, int i, int size) {

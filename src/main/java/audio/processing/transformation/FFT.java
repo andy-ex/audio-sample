@@ -3,6 +3,8 @@ package audio.processing.transformation;
 import audio.processing.model.Complex;
 import audio.processing.model.ComplexArray;
 
+import java.util.Arrays;
+
 /**
  * Created by Dmitry on 7/24/2014.
  */
@@ -10,7 +12,6 @@ public class FFT implements FourierTransform {
 
     @Override
     public ComplexArray transform(double[] realPart) {
-
         realPart = zeroPad(realPart);
 
         return fft(realPart);
@@ -53,9 +54,9 @@ public class FFT implements FourierTransform {
 //            result[i] = first.plus(factor.times(second));
 //        }
 //        return result;
-        ComplexArray result = new ComplexArray(array.length);
-        result.setRealPart(realPart);
-        result.setImaginaryPart(imaginaryPart);
+        ComplexArray result = new ComplexArray(array.length / 2 + 1);
+        result.setRealPart(Arrays.copyOfRange(realPart, 0, array.length / 2 + 1));
+        result.setImaginaryPart(Arrays.copyOfRange(imaginaryPart, 0, array.length / 2 + 1));
 
         return result;
     }
@@ -154,7 +155,7 @@ public class FFT implements FourierTransform {
 
     private double[] zeroPad(double[] in) {
 
-        int size = powerOf2(in.length);
+        int size  = nearestPowerOf2(in.length);
         double[] array = new double[size];
 
         for (int i = 0; i < size; ++i) {
@@ -164,7 +165,22 @@ public class FFT implements FourierTransform {
         return array;
     }
 
-    private int powerOf2(int length) {
+    public static int getFFTSize(int arraySize) {
+        return nearestPowerOf2(arraySize);
+    }
+
+    private static int nearestPowerOf2(int in) {
+        int lower = powerOf2(in/2);
+        int bigger = powerOf2(in);
+
+        if (in - lower > bigger - in) {
+            return bigger;
+        } else {
+            return lower;
+        }
+    }
+
+    private static int powerOf2(int length) {
         if (isPowerOf2(length)) {
             return length;
         }
@@ -177,7 +193,7 @@ public class FFT implements FourierTransform {
         return ++length;
     }
 
-    private boolean isPowerOf2(int n) {
+    private static boolean isPowerOf2(int n) {
         return (n & (n - 1)) == 0;
     }
 }

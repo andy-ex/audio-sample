@@ -21,14 +21,7 @@ public class TestLauncher {
     }
 
     private static void mfccTest() {
-        MelFilterBank filterBank = new MelFilterBank();
 
-        int[] melSpacedFrequencies = filterBank.getMelSpacedFrequencies(300, 8000, 512, 26);
-        System.out.println(melSpacedFrequencies.length);
-        System.out.println(Arrays.toString(melSpacedFrequencies));
-
-        System.out.println(filterBank.createFilterBank(melSpacedFrequencies, 1).length);
-        System.out.println(Arrays.toString(filterBank.createFilterBank(melSpacedFrequencies, 1)));
     }
 
     private static void frameTest() {

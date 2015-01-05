@@ -87,4 +87,24 @@ public class ArraysHelper {
             in[i] = Math.log(in[i]);
         }
     }
+
+    public static double average(double[] in) {
+        double sum = 0.0;
+        for (int i = 0; i < in.length; i++) {
+            sum += in[i];
+        }
+        return sum / in.length;
+    }
+
+    public static double[] averageByColumn(double[][] in) {
+        double[] result = new double[in[0].length];
+        for (int i = 0; i < result.length; i++) {
+            double sum = 0.0;
+            for (int j = 0; j < in.length; j++) {
+                sum += in[j][i];
+            }
+            result[i] = sum / in.length;
+        }
+        return result;
+    }
 }

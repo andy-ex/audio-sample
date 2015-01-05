@@ -1,5 +1,6 @@
 package controller;
 
+import audio.processing.framing.SignalFramer;
 import audio.processing.mfcc.MfccExtractor;
 import audio.processing.waveform.*;
 import audio.processing.mfcc.MelFilterBank;
@@ -23,6 +24,10 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 
+import static util.ArraysHelper.average;
+import static util.ArraysHelper.averageByColumn;
+import static util.ArraysHelper.createSequentialDoubleArray;
+
 /**
  * Created by Dmitry on 6/27/2014
  */
@@ -35,20 +40,26 @@ public class Controller implements Initializable {
     private VBox root;
 
     public static void main(String[] args) throws UnsupportedAudioFileException, IOException, URISyntaxException {
-        double d = (double)6/10;
-        System.out.println(d);
         new Controller().plotDefault();
     }
 
     public void plotDefault() throws IOException, UnsupportedAudioFileException, URISyntaxException {
-        File file = new File(FileSystem.getResourceURL("/sine-440.wav").toURI());
 
-        if (file != null) {
+        for (int i = 1; i < 5; ++i) {
+            File file = new File(FileSystem.getResourceURL("/sounds/naobo/" + i + ".wav").toURI());
             double[] waveform = extractWaveform(file);
             double[][] coefficients = new MfccExtractor().extractCoefficients(waveform, 44100);
-            for (double[] coefficient : coefficients) {
-                print(coefficient);
+            System.out.println(average(averageByColumn(coefficients)));
+        }
+        System.out.println(" ");
+        for (int i = 0; i < 10; ++i) {
+            File file = new File(FileSystem.getResourceURL("/sounds/clarinet/" + i + ".wav").toURI());
+            double[] waveform = extractWaveform(file);
+            if (waveform == null || waveform.length < 1) {
+                continue;
             }
+            double[][] coefficients = new MfccExtractor().extractCoefficients(waveform, 44100);
+            System.out.println(average(averageByColumn(coefficients)));
         }
     }
 
@@ -73,12 +84,10 @@ public class Controller implements Initializable {
     }
 
     public void plotMelFilterBank() {
-        MelFilterBank bank = new MelFilterBank();
-        int[] melSpacedFrequencies = bank.getMelSpacedFrequencies(300, 8000, 512, 10);
-        System.out.println(Arrays.toString(melSpacedFrequencies));
-
-        for (int i = 1; i < melSpacedFrequencies.length; i++) {
-            plot(bank.createFilterBank(melSpacedFrequencies, i));
+        MelFilterBank bank = new MelFilterBank(0, 22050, 1024, 26);
+        System.out.println(bank.getFilterBank(0).length);
+        for (int i = 0; i < bank.getFiltersCount(); i++) {
+            plot(bank.getFilterBank(i));
         }
     }
 
