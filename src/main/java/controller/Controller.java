@@ -45,8 +45,8 @@ public class Controller implements Initializable {
 
     public void plotDefault() throws IOException, UnsupportedAudioFileException, URISyntaxException {
 
-        for (int i = 1; i < 5; ++i) {
-            File file = new File(FileSystem.getResourceURL("/sounds/naobo/" + i + ".wav").toURI());
+        for (int i = 0; i < 10; ++i) {
+            File file = new File(FileSystem.getResourceURL("/sounds/naobo/wav/" + i + ".wav").toURI());
             double[] waveform = extractWaveform(file);
             double[][] coefficients = new MfccExtractor().extractCoefficients(waveform, 44100);
             System.out.println(average(averageByColumn(coefficients)));
