@@ -1,127 +1,50 @@
 package sample;
 
-import audio.processing.framing.SignalFramer;
-import audio.processing.mfcc.MelFilterBank;
-import audio.processing.model.Complex;
-import audio.processing.model.ComplexArray;
-import audio.processing.transformation.DFT;
-import audio.processing.transformation.FFT;
-import audio.processing.transformation.FFTTest;
-import util.ArraysHelper;
+import audio.classification.Label;
+import audio.classification.model.Point;
+import audio.classification.svm.SupportVectorMachine;
+import edu.berkeley.compbio.jlibsvm.kernel.KernelFunction;
+import edu.berkeley.compbio.jlibsvm.kernel.LinearKernel;
+import edu.berkeley.compbio.jlibsvm.util.SparseVector;
 
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 
 public class TestLauncher {
 
     public static void main(String[] args) {
+        KernelFunction<SparseVector> kernelFunction = new LinearKernel();
 
-        mfccTest();
+        final Set<Point> trueExamples = new HashSet<Point>() {{
+            add(createPoint(5,1));
+            add(createPoint(4,2));
+            add(createPoint(4.5f,1.5f));
+            add(createPoint(6,2));
+        }};
+        final Set<Point> falseExamples = new HashSet<Point>() {{
+            add(createPoint(1,5));
+            add(createPoint(2,4));
+            add(createPoint(1.5f,4.5f));
+            add(createPoint(2,6));
+        }};
 
-    }
+        Map<Label, Set<Point>> trainData = new HashMap<>();
+        trainData.put(new Label(1, "x > y"), trueExamples);
+        trainData.put(new Label(-1, "x < y"), falseExamples);
 
-    private static void mfccTest() {
+        SupportVectorMachine svm = new SupportVectorMachine();
+        svm.train(trainData);
 
-    }
-
-    private static void frameTest() {
-        SignalFramer framer = new SignalFramer(16);
-        double[] signal = ArraysHelper.createSequentialDoubleArray(15);
-
-//        DoubleFFT_1D fft1d = new DoubleFFT_1D(signal.length);
-//
-//        double[] fftd = new double[signal.length * 2];
-//        System.arraycopy(signal, 0, fftd, 0, signal.length);
-//        fft1d.realForwardFull(fftd);
-
-        ComplexArray fft = new FFT().transform(signal);
-        ComplexArray dft = new DFT().transform(signal);
-
-        //fft.setRealPart(new HammingWindow().apply(fft.getRealPart()));
-        //dft.setRealPart(new HammingWindow().apply(dft.getRealPart()));
-
-        System.out.println(fft.toString());
-        System.out.println(dft.toString());
-    }
-
-    private static void temp() {
-
-        double[] array = new double[]{0, 1, 2, 3, 4, 5, 6, 7};
-        double[] arrayCopy = Arrays.copyOf(array, array.length);
-
-        FFT fft = new FFT();
-
-        FFTTest.transformRadix2(array, new double[array.length]);
-        ComplexArray result = fft.fft(arrayCopy);
-
-        System.out.println(Arrays.toString(array));
-        System.out.println(Arrays.toString(result.getRealPart()));
-
-//        int shift = 1 + Integer.numberOfLeadingZeros(array.length);
-//
-//        for (int i = 0; i < array.length; ++i) {
-//            int reversed = Integer.reverse(i) >>> shift;
-//            if (reversed > i) {
-//                int temp = array[i];
-//                array[i] = array[reversed];
-//                array[reversed] = temp;
-//            }
-//        }
-
-//        for (int i = 2; i <= array.length; i *= 2) {
-//            int half = i / 2;
-//            for (int j = 0; j < array.length; j += i) {
-//                for (int k = j; k < j + half; ++k) {
-//                    array[k] += array[k + half];
-//                    array[k + half] = array[k];
-//                }
-//                System.out.println(Arrays.toString(array));
-//            }
-//        }
-        //System.out.println(Arrays.toString(array));
-
-    }
-
-    private static void testFFT() {
-        DFT dft = new DFT();
-        FFT fft = new FFT();
-
-        double[] real = {0.0, 1.0, 2.0, 3.0, 4, 5, 6, 7};
-        double[] imag = {0, 0, 0, 0, 0, 0, 0, 0};
-
-        // Complex[] fftResult = fft.fft(real);
-        ComplexArray dftResult = dft.transform(real);
-        FFTTest.transform(real, imag);
-
-        System.out.println(Arrays.toString(real));
-        System.out.println(Arrays.toString(imag));
-        System.out.println(Arrays.toString(dftResult.getRealPart()));
-        //System.out.println(Arrays.toString(fftResult));
-    }
-
-    private static Complex[] toComplexArray(double[] in) {
-        Complex[] result = new Complex[in.length];
-        for (int i = 0; i < result.length; i++) {
-            result[i] = new Complex(in[i], 0);
+        for (int i = 0; i < 5; i++) {
+            Point point = createPoint(i, 5 - i);
+            System.out.println(point + "; Result: " + svm.predict(point));
         }
-        return result;
     }
 
-    private static void windowing() {
-        int nSamples = 100;
-        int m = nSamples / 2;
-        double r;
-        double pi = Math.PI;
-        double[] w = new double[nSamples];
-
-        r = pi / m;
-        for (int n = -m; n < m; n++)
-            w[m + n] = 0.54f + 0.46f * Math.cos(n * r);
-
-        System.out.println(Arrays.toString(w));
-
-        int[] e = new int[nSamples];
-        Arrays.fill(e, 1);
-        //System.out.println(Arrays.toString( new HammingWindow().apply(e)));
+    private static Point createPoint(float x, float y) {
+        return new Point(x, y);
     }
 }

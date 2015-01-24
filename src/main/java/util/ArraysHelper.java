@@ -36,6 +36,14 @@ public class ArraysHelper {
         return result;
     }
 
+    public static float[] createSequentialFloatArray(int size) {
+        float[] result = new float[size];
+        for (int i = 0; i < result.length; i++) {
+            result[i] = i;
+        }
+        return result;
+    }
+
     public static double[] toDoubleArray(int[] input) {
         double[] result = new double[input.length];
         for (int i = 0; i < input.length; i++) {
