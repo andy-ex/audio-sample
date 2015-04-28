@@ -3,6 +3,7 @@ package audio.processing.waveform;
 import java.io.File;
 
 public class WavFileExtractor implements WaveformExtractor {
+
     @Override
     public double[] extract(File in) {
         try {

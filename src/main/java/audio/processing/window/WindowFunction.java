@@ -5,7 +5,15 @@ package audio.processing.window;
  */
 public interface WindowFunction {
 
-    double[] apply(double[] in);
+    default double[] apply(double[] in) {
+        int length = in.length;
+        double[] result = new double[length];
+
+        for (int i = 0; i < length; ++i) {
+            result[i] = in[i] * get(i, length);
+        }
+        return result;
+    }
     double get(int index, int length);
 
 }

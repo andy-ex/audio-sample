@@ -1,9 +1,11 @@
 package controller;
 
-import audio.processing.framing.SignalFramer;
-import audio.processing.mfcc.MfccExtractor;
+import audio.features.FeatureExtractor;
+import audio.features.mfcc.MfccExtractor;
+import audio.features.spectral.RMS;
+import audio.features.spectral.ZCR;
 import audio.processing.waveform.*;
-import audio.processing.mfcc.MelFilterBank;
+import audio.features.mfcc.MelFilterBank;
 import audio.processing.model.ComplexArray;
 import audio.processing.transformation.FFT;
 import audio.processing.window.HammingWindow;
@@ -26,7 +28,6 @@ import java.util.*;
 
 import static util.ArraysHelper.average;
 import static util.ArraysHelper.averageByColumn;
-import static util.ArraysHelper.createSequentialDoubleArray;
 
 /**
  * Created by Dmitry on 6/27/2014
@@ -45,21 +46,25 @@ public class Controller implements Initializable {
 
     public void plotDefault() throws IOException, UnsupportedAudioFileException, URISyntaxException {
 
-        for (int i = 0; i < 10; ++i) {
-            File file = new File(FileSystem.getResourceURL("/sounds/naobo/wav/" + i + ".wav").toURI());
+        FeatureExtractor extractor = new ZCR();
+
+        for (int i = 0; i < 1; ++i) {
+            File file = new File(FileSystem.getResourceURL("/genres/classical/classical." + i + ".wav").toURI());
             double[] waveform = extractWaveform(file);
-            double[][] coefficients = new MfccExtractor().extractCoefficients(waveform, 44100);
-            System.out.println(average(averageByColumn(coefficients)));
+            double[][] coefficients = new MfccExtractor().extractCoefficients(waveform, 22050);
+            //System.out.println(average(averageByColumn(coefficients)));
+            System.out.println(extractor.extract(waveform, 22050)[0][0]);
         }
         System.out.println(" ");
-        for (int i = 0; i < 10; ++i) {
-            File file = new File(FileSystem.getResourceURL("/sounds/clarinet/" + i + ".wav").toURI());
+        for (int i = 0; i < 1; ++i) {
+            File file = new File(FileSystem.getResourceURL("/genres/metal/metal." + i + ".wav").toURI());
             double[] waveform = extractWaveform(file);
             if (waveform == null || waveform.length < 1) {
                 continue;
             }
-            double[][] coefficients = new MfccExtractor().extractCoefficients(waveform, 44100);
-            System.out.println(average(averageByColumn(coefficients)));
+            double[][] coefficients = new MfccExtractor().extractCoefficients(waveform, 22050);
+            //System.out.println(average(averageByColumn(coefficients)));
+            System.out.println(extractor.extract(waveform, 22050)[0][0]);
         }
     }
 

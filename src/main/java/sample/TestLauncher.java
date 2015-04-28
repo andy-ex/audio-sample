@@ -3,6 +3,7 @@ package sample;
 import audio.classification.Label;
 import audio.classification.model.Point;
 import audio.classification.svm.SupportVectorMachine;
+import edu.berkeley.compbio.jlibsvm.kernel.GaussianRBFKernel;
 import edu.berkeley.compbio.jlibsvm.kernel.KernelFunction;
 import edu.berkeley.compbio.jlibsvm.kernel.LinearKernel;
 import edu.berkeley.compbio.jlibsvm.util.SparseVector;
@@ -16,7 +17,8 @@ import java.util.Set;
 public class TestLauncher {
 
     public static void main(String[] args) {
-        KernelFunction<SparseVector> kernelFunction = new LinearKernel();
+
+        KernelFunction<SparseVector> kernelFunction = new GaussianRBFKernel(0.5f);
 
         final Set<Point> trueExamples = new HashSet<Point>() {{
             add(createPoint(5,1));

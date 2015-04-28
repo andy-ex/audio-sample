@@ -1,4 +1,4 @@
-package audio.processing.mfcc;
+package audio.features.mfcc;
 
 /**
  * Created by Dmitry on 05.10.2014.

@@ -1,9 +1,8 @@
-package audio.processing.mfcc;
+package audio.features.mfcc;
 
 import audio.processing.framing.SignalFramer;
 import audio.processing.model.ComplexArray;
 import audio.processing.transformation.DCT;
-import audio.processing.transformation.DFT;
 import audio.processing.transformation.FFT;
 import audio.processing.transformation.FourierTransform;
 
