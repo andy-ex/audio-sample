@@ -135,4 +135,16 @@ public class ArraysHelper {
 
         return result;
     }
+
+    public static double euclideanDistance(double[] a, double[] b) {
+        assert a.length == b.length;
+
+        double sum = 0.0;
+        for (int i = 0; i < a.length; i++) {
+            sum += Math.pow(a[i] - b[i], 2);
+        }
+
+        return Math.sqrt(sum);
+    }
+
 }
