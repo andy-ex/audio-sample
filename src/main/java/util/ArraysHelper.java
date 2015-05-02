@@ -1,5 +1,6 @@
 package util;
 
+import audio.processing.model.ComplexArray;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.Arrays;
@@ -42,6 +43,12 @@ public class ArraysHelper {
             result[i] = i;
         }
         return result;
+    }
+
+    public static void copyTo(double[] from, int indexFrom, int indexTo, double[] to) {
+        for (int i = 0; i < Math.min(indexTo - indexFrom, to.length); i++) {
+            to[i] = from[i + indexFrom];
+        }
     }
 
     public static double[] toDoubleArray(int[] input) {
@@ -113,6 +120,19 @@ public class ArraysHelper {
             }
             result[i] = sum / in.length;
         }
+        return result;
+    }
+
+    public static double[] powerSpectrum(ComplexArray complexArray) {
+        double[] realPart = complexArray.getRealPart();
+        double[] imaginaryPart = complexArray.getImaginaryPart();
+
+        double[] result = new double[realPart.length];
+        for (int i = 0; i < realPart.length; i++) {
+            double abs = Math.pow(realPart[i], 2) + Math.pow(imaginaryPart[i], 2);
+            result[i] = abs;
+        }
+
         return result;
     }
 }

@@ -3,6 +3,7 @@ package controller;
 import audio.features.FeatureExtractor;
 import audio.features.mfcc.MfccExtractor;
 import audio.features.spectral.RMS;
+import audio.features.spectral.SpectralCentroid;
 import audio.features.spectral.ZCR;
 import audio.processing.waveform.*;
 import audio.features.mfcc.MelFilterBank;
@@ -46,25 +47,20 @@ public class Controller implements Initializable {
 
     public void plotDefault() throws IOException, UnsupportedAudioFileException, URISyntaxException {
 
-        FeatureExtractor extractor = new ZCR();
+        FeatureExtractor extractor = new SpectralCentroid();
 
-        for (int i = 0; i < 1; ++i) {
-            File file = new File(FileSystem.getResourceURL("/genres/classical/classical." + i + ".wav").toURI());
-            double[] waveform = extractWaveform(file);
-            double[][] coefficients = new MfccExtractor().extractCoefficients(waveform, 22050);
-            //System.out.println(average(averageByColumn(coefficients)));
-            System.out.println(extractor.extract(waveform, 22050)[0][0]);
-        }
-        System.out.println(" ");
-        for (int i = 0; i < 1; ++i) {
-            File file = new File(FileSystem.getResourceURL("/genres/metal/metal." + i + ".wav").toURI());
-            double[] waveform = extractWaveform(file);
-            if (waveform == null || waveform.length < 1) {
-                continue;
+        List<String> genres = Arrays.asList("classical", "metal", "rock");
+
+        for (String genre : genres) {
+            System.out.println("Genre: " + genre);
+            for (int i = 0; i < 10; ++i) {
+                File file = new File(FileSystem.getResourceURL("/genres/" + genre + "/" + genre + "." + i + ".wav").toURI());
+                double[] waveform = extractWaveform(file);
+                //double[][] coefficients = new MfccExtractor().extractCoefficients(waveform, 22050);
+                //System.out.println(average(averageByColumn(coefficients)));
+                System.out.println(ArraysHelper.average(extractor.extract(waveform, 22050)[0]));
             }
-            double[][] coefficients = new MfccExtractor().extractCoefficients(waveform, 22050);
-            //System.out.println(average(averageByColumn(coefficients)));
-            System.out.println(extractor.extract(waveform, 22050)[0][0]);
+            System.out.println();
         }
     }
 
