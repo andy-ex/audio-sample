@@ -2,6 +2,9 @@ package audio.classification.svm;
 
 import audio.classification.Label;
 import audio.classification.MachineLearningClassifier;
+import audio.classification.Predictable;
+import audio.classification.Trainable;
+import audio.classification.model.Point;
 import edu.berkeley.compbio.jlibsvm.ImmutableSvmParameter;
 import edu.berkeley.compbio.jlibsvm.ImmutableSvmParameterPoint;
 import edu.berkeley.compbio.jlibsvm.binary.BinaryClassificationProblem;
@@ -12,16 +15,17 @@ import edu.berkeley.compbio.jlibsvm.kernel.KernelFunction;
 import edu.berkeley.compbio.jlibsvm.kernel.LinearKernel;
 import edu.berkeley.compbio.jlibsvm.util.SparseVector;
 
+import javax.crypto.Mac;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class SupportVectorMachine implements MachineLearningClassifier<double[]> {
+public class SupportVectorMachine2D implements MachineLearningClassifier<Point> {
 
     private BinaryModel<Label, SparseVector> binaryModel;
 
     @Override
-    public void train(Map<Label, Set<double[]>> trainData) {
+    public void train(Map<Label, Set<Point>> trainData) {
         KernelFunction<SparseVector> kernelFunction = new LinearKernel();
 
         Map<SparseVector, Label> trainMap = createTrainMap(trainData);
@@ -38,7 +42,7 @@ public class SupportVectorMachine implements MachineLearningClassifier<double[]>
     }
 
     @Override
-    public Label predict(double[] input) {
+    public Label predict(Point input) {
         if (binaryModel == null) {
             throw new IllegalStateException("SupportVectorMachine should be trained first!");
         }
@@ -52,11 +56,11 @@ public class SupportVectorMachine implements MachineLearningClassifier<double[]>
         return builder;
     }
 
-    private Map<SparseVector, Label> createTrainMap(Map<Label, Set<double[]>> trainData) {
+    private Map<SparseVector, Label> createTrainMap(Map<Label, Set<Point>> trainData) {
         Map<SparseVector, Label> trainMap = new HashMap<>();
-        for (Map.Entry<Label, Set<double[]>> entry : trainData.entrySet()) {
-            for (double[] array : entry.getValue()) {
-                trainMap.put(createSparseVector(array), entry.getKey());
+        for (Map.Entry<Label, Set<Point>> entry : trainData.entrySet()) {
+            for (Point point : entry.getValue()) {
+                trainMap.put(createSparseVector(point), entry.getKey());
             }
         }
         return trainMap;
@@ -71,12 +75,11 @@ public class SupportVectorMachine implements MachineLearningClassifier<double[]>
         return ids;
     }
 
-    private SparseVector createSparseVector(double[] vector) {
-        SparseVector sparseVector = new SparseVector(vector.length);
-        for (int i = 0; i < vector.length; i++) {
-            sparseVector.indexes[i] = i;
-            sparseVector.values[i] = (float) vector[i];
-        }
+    private SparseVector createSparseVector(Point point) {
+        SparseVector sparseVector = new SparseVector(2);
+        sparseVector.indexes = new int[] {0, 1};
+        sparseVector.values = new float[] {point.getX(), point.getY()};
         return sparseVector;
     }
+
 }

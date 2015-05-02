@@ -4,21 +4,22 @@ import audio.classification.Label;
 import audio.classification.MachineLearningClassifier;
 import edu.berkeley.compbio.jlibsvm.ImmutableSvmParameter;
 import edu.berkeley.compbio.jlibsvm.ImmutableSvmParameterPoint;
-import edu.berkeley.compbio.jlibsvm.binary.BinaryClassificationProblem;
-import edu.berkeley.compbio.jlibsvm.binary.BinaryClassificationProblemImpl;
-import edu.berkeley.compbio.jlibsvm.binary.BinaryModel;
 import edu.berkeley.compbio.jlibsvm.binary.C_SVC;
 import edu.berkeley.compbio.jlibsvm.kernel.KernelFunction;
 import edu.berkeley.compbio.jlibsvm.kernel.LinearKernel;
+import edu.berkeley.compbio.jlibsvm.multi.MultiClassModel;
+import edu.berkeley.compbio.jlibsvm.multi.MultiClassProblemImpl;
+import edu.berkeley.compbio.jlibsvm.multi.MultiClassificationSVM;
+import edu.berkeley.compbio.jlibsvm.scaler.NoopScalingModel;
 import edu.berkeley.compbio.jlibsvm.util.SparseVector;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class SupportVectorMachine implements MachineLearningClassifier<double[]> {
+public class MultiClassSupportVectorMachine implements MachineLearningClassifier<double[]> {
 
-    private BinaryModel<Label, SparseVector> binaryModel;
+    private MultiClassModel<Label, SparseVector> multiClassModel;
 
     @Override
     public void train(Map<Label, Set<double[]>> trainData) {
@@ -27,22 +28,22 @@ public class SupportVectorMachine implements MachineLearningClassifier<double[]>
         Map<SparseVector, Label> trainMap = createTrainMap(trainData);
         Map<SparseVector, Integer> ids = createIds(trainMap);
 
-        BinaryClassificationProblem<Label, SparseVector> problem = new BinaryClassificationProblemImpl<>(
-                Label.class, trainMap, ids);
+        MultiClassProblemImpl<Label, SparseVector> problem = new MultiClassProblemImpl<>(
+                Label.class, new LabelInverter(), trainMap, ids, new NoopScalingModel<>());
 
         ImmutableSvmParameter<Label, SparseVector> param = new ImmutableSvmParameterPoint<>(createBuilder(kernelFunction));
 
-        C_SVC<Label, SparseVector> svm = new C_SVC<>();
+        MultiClassificationSVM<Label, SparseVector> svm = new MultiClassificationSVM<>(new C_SVC<>());
 
-        binaryModel = svm.train(problem, param);
+        this.multiClassModel = svm.train(problem, param);
     }
 
     @Override
     public Label predict(double[] input) {
-        if (binaryModel == null) {
+        if (multiClassModel == null) {
             throw new IllegalStateException("SupportVectorMachine should be trained first!");
         }
-        return binaryModel.predictLabel(createSparseVector(input));
+        return multiClassModel.predictLabel(createSparseVector(input));
     }
 
     private ImmutableSvmParameterPoint.Builder<Label, SparseVector> createBuilder(KernelFunction<SparseVector> kernelFunction) {
@@ -64,9 +65,8 @@ public class SupportVectorMachine implements MachineLearningClassifier<double[]>
 
     private Map<SparseVector, Integer> createIds(Map<SparseVector, Label> trainMap) {
         Map<SparseVector, Integer> ids = new HashMap<>();
-        int i = 0;
-        for (SparseVector sparseVector : trainMap.keySet()) {
-            ids.put(sparseVector, i++);
+        for (Map.Entry<SparseVector, Label> entry : trainMap.entrySet()) {
+            ids.put(entry.getKey(), entry.getValue().getId());
         }
         return ids;
     }
@@ -79,4 +79,5 @@ public class SupportVectorMachine implements MachineLearningClassifier<double[]>
         }
         return sparseVector;
     }
+
 }
