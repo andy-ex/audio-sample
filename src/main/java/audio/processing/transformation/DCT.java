@@ -3,8 +3,9 @@ package audio.processing.transformation;
 /**
  * Created by Dmitry on 06.10.2014.
  */
-public class DCT {
+public class DCT implements Transformation<double[], double[]> {
 
+    @Override
     public double[] transform(double[] source) {
         int N = source.length;
 
