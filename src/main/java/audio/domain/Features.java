@@ -1,10 +1,19 @@
 package audio.domain;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import java.lang.reflect.Field;
 
+@XmlAccessorType(XmlAccessType.FIELD)
 public class Features {
 
-    private double mfcc;
+    @XmlElementWrapper(name = "mfccs")
+    @XmlElement(name = "mfcc")
+    private double[] mfccs;
+
+    private double mfccMean;
     private double zcr;
     private double rms;
     private double spectralCentroid;
@@ -19,12 +28,20 @@ public class Features {
         }
     }
 
-    public double getMfcc() {
-        return mfcc;
+    public double[] getMfccs() {
+        return mfccs;
     }
 
-    public void setMfcc(double mfcc) {
-        this.mfcc = mfcc;
+    public void setMfccs(double[] mfccs) {
+        this.mfccs = mfccs;
+    }
+
+    public double getMfccMean() {
+        return mfccMean;
+    }
+
+    public void setMfccMean(double mfccMean) {
+        this.mfccMean = mfccMean;
     }
 
     public double getZcr() {

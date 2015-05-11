@@ -9,6 +9,7 @@ import audio.processing.waveform.*;
 import audio.features.mfcc.MelFilterBank;
 import audio.processing.model.ComplexArray;
 import audio.processing.transformation.FFT;
+import audio.processing.window.BlackmanWindow;
 import audio.processing.window.HammingWindow;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -19,10 +20,12 @@ import javafx.stage.FileChooser;
 import util.ArraysHelper;
 import util.FileSystem;
 import util.LineChartUtil;
+import weka.core.Instances;
 
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
 import java.io.IOException;
+import java.io.StringReader;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
@@ -41,27 +44,21 @@ public class Controller implements Initializable {
     @FXML
     private VBox root;
 
-    public static void main(String[] args) throws UnsupportedAudioFileException, IOException, URISyntaxException {
-        new Controller().plotDefault();
-    }
-
     public void plotDefault() throws IOException, UnsupportedAudioFileException, URISyntaxException {
 
-        FeatureExtractor extractor = new SpectralCentroid();
+        double[] array = new double[128];
+        Arrays.fill(array, 1);
+        double[] windowed = new HammingWindow().apply(array);
+        XYChart.Series<Number, Number> numberSeries = LineChartUtil.createNumberSeries(windowed);
 
-        List<String> genres = Arrays.asList("classical", "metal", "rock");
+        lineChart.getData().addAll(numberSeries);
 
-        for (String genre : genres) {
-            System.out.println("Genre: " + genre);
-            for (int i = 0; i < 10; ++i) {
-                File file = new File(FileSystem.getResourceURL("/genres/" + genre + "/" + genre + "." + i + ".wav").toURI());
-                double[] waveform = extractWaveform(file);
-                //double[][] coefficients = new MfccExtractor().extractCoefficients(waveform, 22050);
-                //System.out.println(average(averageByColumn(coefficients)));
-                System.out.println(ArraysHelper.average(extractor.extract(waveform, 22050)[0]));
-            }
-            System.out.println();
-        }
+        Arrays.fill(array, 1);
+        windowed = new BlackmanWindow().apply(array);
+        XYChart.Series<Number, Number> numberSeries1 = LineChartUtil.createNumberSeries(windowed);
+
+
+        lineChart.getData().addAll(numberSeries1);
     }
 
     public void plotAudio() throws IOException, UnsupportedAudioFileException, WavFileException {
@@ -103,6 +100,10 @@ public class Controller implements Initializable {
 
     private double[] extractWaveform(File file) throws IOException, UnsupportedAudioFileException {
         return new WavFileExtractor().extract(file);
+    }
+
+    private void unused() throws IOException {
+
     }
 
 
@@ -158,7 +159,7 @@ public class Controller implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         //lineChart.getXAxis().setAutoRanging(true);
         //lineChart.getYAxis().setAutoRanging(true);
-        lineChart.getStyleClass().add("thin-chart");
+//        lineChart.getStyleClass().add("thin-chart");
         lineChart.setCreateSymbols(false);
 
     }

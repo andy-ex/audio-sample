@@ -1,6 +1,6 @@
 @RELATION sound
 
-@ATTRIBUTE mfcc NUMERIC
+@ATTRIBUTE mfccMean NUMERIC
 @ATTRIBUTE class {classical, jazz, hiphop, rock}
 
 

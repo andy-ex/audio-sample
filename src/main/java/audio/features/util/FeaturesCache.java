@@ -1,4 +1,4 @@
-package audio.features.cache;
+package audio.features.util;
 
 import audio.domain.Features;
 import audio.domain.Genre;
@@ -26,7 +26,33 @@ public class FeaturesCache {
 
 
     public static void main(String[] args) throws URISyntaxException, JAXBException {
-        naturalSort();
+        Sounds sounds = loadSounds();
+
+        for (Genre genre : sounds.getGenres()) {
+            for (Sound sound : genre.getSounds()) {
+                File file = new File(sound.getPath());
+                double[] waveform = new WavFileExtractor().extract(file);
+                double[][] mfcc = new MfccExtractor().extractCoefficients(waveform, 22050);
+                sound.getFeatures().setMfccs(ArraysHelper.averageByColumn(mfcc));
+            }
+        }
+
+        Marshaller marshaller = JAXBContext.newInstance(Sounds.class).createMarshaller();
+        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+        marshaller.marshal(sounds, new File("sounds_result.xml"));
+
+    }
+
+
+    private static void saveSoundArff() {
+        Sounds sounds = FeaturesCache.loadSounds();
+
+        System.out.println("@DATA");
+        for (Genre genre : sounds.getGenres()) {
+            for (Sound sound : genre.getSounds()) {
+                //System.out.println(StringUtils.join(SysgetFeatureValues(includeFeatures)) + "," + genre.getGenreId());
+            }
+        }
     }
 
     public static Sounds loadSounds() {
@@ -80,7 +106,7 @@ public class FeaturesCache {
                 Features features = new Features();
 
                 double[][] coefficients = new MfccExtractor().extractCoefficients(waveform, 22050);
-                features.setMfcc(ArraysHelper.average(ArraysHelper.averageByColumn(coefficients)));
+                features.setMfccMean(ArraysHelper.average(ArraysHelper.averageByColumn(coefficients)));
 
                 double[][] sc = spectralCentroid.extract(waveform, 22050);
                 features.setSpectralCentroid(ArraysHelper.average(sc[0]));

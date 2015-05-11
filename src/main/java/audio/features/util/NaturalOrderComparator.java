@@ -1,4 +1,4 @@
-package audio.features.cache;
+package audio.features.util;
 
 /*
  NaturalOrderComparator.java -- Perform 'natural order' comparisons of strings in Java.

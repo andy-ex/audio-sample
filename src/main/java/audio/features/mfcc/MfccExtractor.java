@@ -1,5 +1,6 @@
 package audio.features.mfcc;
 
+import audio.features.FeatureExtractor;
 import audio.processing.framing.SignalFramer;
 import audio.processing.model.ComplexArray;
 import audio.processing.transformation.DCT;
@@ -13,13 +14,14 @@ import static util.ArraysHelper.*;
 /**
  * Created by Dmitry on 09.10.2014.
  */
-public class MfccExtractor {
+public class MfccExtractor implements FeatureExtractor {
 
     public static final double EPS = 0.000001;
     private FourierTransform transformation = new FFT();
     private static final int COEFFICIENTS_COUNT = 26;
 
-    public double[][] extractCoefficients(double[] sourceSignal, int sampleRate) {
+    @Override
+    public double[][] extract(double[] sourceSignal, int sampleRate) {
         SignalFramer signalFramer = new SignalFramer(sampleRate);
         int framesCount = sourceSignal.length / signalFramer.getFrameStep();
 
