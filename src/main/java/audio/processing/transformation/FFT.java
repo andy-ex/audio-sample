@@ -17,7 +17,7 @@ public class FFT implements FourierTransform {
         return fft(realPart);
     }
 
-    public ComplexArray fft(double[] in) {
+    private ComplexArray fft(double[] in) {
         int n = in.length;
         double[] realPart = in;
         double[] imaginaryPart = new double[n];
@@ -91,7 +91,7 @@ public class FFT implements FourierTransform {
         return result;
     }
 
-    public Complex[] inplaceFFT(Complex[] x) {
+    private Complex[] inplaceFFT(Complex[] x) {
         int N = x.length;
 
         // base case
@@ -127,7 +127,7 @@ public class FFT implements FourierTransform {
         return y;
     }
 
-    public Complex[] toComplex(double[] x) {
+    private Complex[] toComplex(double[] x) {
         Complex[] complexes = new Complex[x.length];
         for (int i = 0; i < complexes.length; i++) {
             complexes[i] = new Complex(x[i], 0.0);
@@ -153,7 +153,7 @@ public class FFT implements FourierTransform {
         return result;
     }
 
-    private double[] zeroPad(double[] in) {
+    public double[] zeroPad(double[] in) {
 
         int size  = nearestPowerOf2(in.length);
         double[] array = new double[size];
@@ -165,11 +165,11 @@ public class FFT implements FourierTransform {
         return array;
     }
 
-    public static int getFFTSize(int arraySize) {
+    private static int getFFTSize(int arraySize) {
         return nearestPowerOf2(arraySize);
     }
 
-    private static int nearestPowerOf2(int in) {
+    public static int nearestPowerOf2(int in) {
         int lower = powerOf2(in/2);
         int bigger = powerOf2(in);
 
