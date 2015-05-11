@@ -6,17 +6,6 @@ package audio.processing.window;
 public class HammingWindow implements WindowFunction {
 
     @Override
-    public double[] apply(double[] in) {
-        int length = in.length;
-        double[] result = new double[length];
-
-        for (int i = 0; i < length; ++i) {
-            result[i] = in[i] * get(i, length);
-        }
-        return result;
-    }
-
-    @Override
     public double get(int index, int length) {
         return 0.54f - 0.46f * (float) Math.cos( (Math.PI * 2.0) * index / length);
     }
