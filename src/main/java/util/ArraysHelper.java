@@ -111,6 +111,14 @@ public class ArraysHelper {
         return sum / in.length;
     }
 
+    public static double average(double[] in, int from, int to) {
+        double sum = 0.0;
+        for (int i = from; i < to; i++) {
+            sum += in[i];
+        }
+        return sum / (to - from);
+    }
+
     public static double[] averageByColumn(double[][] in) {
         double[] result = new double[in[0].length];
         for (int i = 0; i < result.length; i++) {

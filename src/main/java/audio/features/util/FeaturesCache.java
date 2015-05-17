@@ -28,15 +28,27 @@ public class FeaturesCache {
     public static void main(String[] args) throws URISyntaxException, JAXBException {
         Sounds sounds = loadSounds();
 
+        double max = 0.0;
         for (Genre genre : sounds.getGenres()) {
+            Collections.sort(genre.getSounds(), new Comparator<Sound>() {
+                @Override
+                public int compare(Sound o1, Sound o2) {
+                    return (int) (o1.getFeatures().getSpectralCentroid() - o2.getFeatures().getSpectralCentroid());
+                }
+            });
+            System.out.println("Genre: " + genre.getGenreId());
+            System.out.println(genre.getSounds().get(0).getFeatures().getSpectralCentroid());
+            System.out.println(genre.getSounds().get(99).getFeatures().getSpectralCentroid());
+            System.out.println();
             for (Sound sound : genre.getSounds()) {
-                File file = new File(sound.getPath());
-                double[] waveform = new WavFileExtractor().extract(file);
-                double[][] mfcc = new MfccExtractor().extractCoefficients(waveform, 22050);
-                sound.getFeatures().setMfccs(ArraysHelper.averageByColumn(mfcc));
+                //File file = new File(sound.getPath());
+                //double[] waveform = new WavFileExtractor().extract(file);
+                //double[][] mfcc = new MfccExtractor().extract(waveform, 22050);
+                //sound.getFeatures().setMfccs(ArraysHelper.averageByColumn(mfcc));
             }
         }
 
+        System.out.println(max);
         Marshaller marshaller = JAXBContext.newInstance(Sounds.class).createMarshaller();
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
         marshaller.marshal(sounds, new File("sounds_result.xml"));
@@ -59,8 +71,9 @@ public class FeaturesCache {
         try {
             JAXBContext context = JAXBContext.newInstance(Sounds.class);
             Unmarshaller unmarshaller = context.createUnmarshaller();
-            return (Sounds) unmarshaller.unmarshal(new File("sounds.xml"));
-        } catch (JAXBException e) {
+            return (Sounds) unmarshaller.unmarshal(FeaturesCache.class.getResourceAsStream("/sounds.xml"));
+        } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
     }
@@ -105,7 +118,7 @@ public class FeaturesCache {
                 Sound sound = new Sound();
                 Features features = new Features();
 
-                double[][] coefficients = new MfccExtractor().extractCoefficients(waveform, 22050);
+                double[][] coefficients = new MfccExtractor().extract(waveform, 22050);
                 features.setMfccMean(ArraysHelper.average(ArraysHelper.averageByColumn(coefficients)));
 
                 double[][] sc = spectralCentroid.extract(waveform, 22050);

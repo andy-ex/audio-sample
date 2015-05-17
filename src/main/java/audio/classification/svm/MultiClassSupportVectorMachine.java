@@ -7,6 +7,8 @@ import edu.berkeley.compbio.jlibsvm.ImmutableSvmParameterPoint;
 import edu.berkeley.compbio.jlibsvm.binary.C_SVC;
 import edu.berkeley.compbio.jlibsvm.kernel.KernelFunction;
 import edu.berkeley.compbio.jlibsvm.kernel.LinearKernel;
+import edu.berkeley.compbio.jlibsvm.kernel.PolynomialKernel;
+import edu.berkeley.compbio.jlibsvm.kernel.SigmoidKernel;
 import edu.berkeley.compbio.jlibsvm.multi.MultiClassModel;
 import edu.berkeley.compbio.jlibsvm.multi.MultiClassProblemImpl;
 import edu.berkeley.compbio.jlibsvm.multi.MultiClassificationSVM;
@@ -24,6 +26,7 @@ public class MultiClassSupportVectorMachine implements MachineLearningClassifier
     @Override
     public void train(Map<Label, Set<double[]>> trainData) {
         KernelFunction<SparseVector> kernelFunction = new LinearKernel();
+        //KernelFunction<SparseVector> kernelFunction = new PolynomialKernel(4, 1, 1);
 
         Map<SparseVector, Label> trainMap = createTrainMap(trainData);
         Map<SparseVector, Integer> ids = createIds(trainMap);

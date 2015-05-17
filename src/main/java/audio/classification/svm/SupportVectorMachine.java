@@ -8,8 +8,7 @@ import edu.berkeley.compbio.jlibsvm.binary.BinaryClassificationProblem;
 import edu.berkeley.compbio.jlibsvm.binary.BinaryClassificationProblemImpl;
 import edu.berkeley.compbio.jlibsvm.binary.BinaryModel;
 import edu.berkeley.compbio.jlibsvm.binary.C_SVC;
-import edu.berkeley.compbio.jlibsvm.kernel.KernelFunction;
-import edu.berkeley.compbio.jlibsvm.kernel.LinearKernel;
+import edu.berkeley.compbio.jlibsvm.kernel.*;
 import edu.berkeley.compbio.jlibsvm.util.SparseVector;
 
 import java.util.HashMap;
@@ -23,6 +22,7 @@ public class SupportVectorMachine implements MachineLearningClassifier<double[]>
     @Override
     public void train(Map<Label, Set<double[]>> trainData) {
         KernelFunction<SparseVector> kernelFunction = new LinearKernel();
+        //KernelFunction<SparseVector> kernelFunction = new GaussianRBFKernel(0.1f);
 
         Map<SparseVector, Label> trainMap = createTrainMap(trainData);
         Map<SparseVector, Integer> ids = createIds(trainMap);

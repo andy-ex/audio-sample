@@ -46,6 +46,19 @@ public class Controller implements Initializable {
 
     public void plotDefault() throws IOException, UnsupportedAudioFileException, URISyntaxException {
 
+        XYChart.Series<Number, Number> kNN = LineChartUtil.createNumberSeries(new double[]{0, 0, 0.773, 0.859, 0.866, 0.832});
+        XYChart.Series<Number, Number> rf = LineChartUtil.createNumberSeries(new double[]{0, 0, 1.307, 1.654, 2.244, 2.469});
+        XYChart.Series<Number, Number> svm = LineChartUtil.createNumberSeries(new double[]{0, 0, 1.091, 10.219, 12.002, 16.246});
+
+        kNN.setName("kNN");
+        rf.setName("Random forest");
+        svm.setName("SVM");
+
+        lineChart.getData().addAll(kNN, rf, svm);
+
+    }
+
+    private void plotWIndowFunctions() {
         double[] array = new double[128];
         Arrays.fill(array, 1);
         double[] windowed = new HammingWindow().apply(array);
@@ -102,11 +115,6 @@ public class Controller implements Initializable {
         return new WavFileExtractor().extract(file);
     }
 
-    private void unused() throws IOException {
-
-    }
-
-
     private File chooseFile() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setInitialDirectory(new File(FileSystem.getResourceFolderPath()));
@@ -160,7 +168,7 @@ public class Controller implements Initializable {
         //lineChart.getXAxis().setAutoRanging(true);
         //lineChart.getYAxis().setAutoRanging(true);
 //        lineChart.getStyleClass().add("thin-chart");
-        lineChart.setCreateSymbols(false);
+        //lineChart.setCreateSymbols(false);
 
     }
 }

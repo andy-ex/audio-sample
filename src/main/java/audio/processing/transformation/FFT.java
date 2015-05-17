@@ -17,7 +17,7 @@ public class FFT implements FourierTransform {
         return fft(realPart);
     }
 
-    private ComplexArray fft(double[] in) {
+    public ComplexArray fft(double[] in) {
         int n = in.length;
         double[] realPart = in;
         double[] imaginaryPart = new double[n];
@@ -165,7 +165,7 @@ public class FFT implements FourierTransform {
         return array;
     }
 
-    private static int getFFTSize(int arraySize) {
+    public static int getFFTSize(int arraySize) {
         return nearestPowerOf2(arraySize);
     }
 
